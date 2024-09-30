@@ -1,0 +1,88 @@
+name: Release on Push to Main
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build project
+        run: cargo build --release
+
+      - name: Verify Build Output
+        run: ls -lh target/release/
+
+      - name: Archive Linux binary
+        run: |
+          gzip -c target/release/valheim-motd > valheim-motd-linux.gz
+
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-binary
+          path: valheim-motd-linux.gz
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build project
+        run: cargo build --release
+
+      - name: Verify Build Output
+        run: ls -lh target/release/
+
+      - name: Archive macOS binary
+        run: |
+          gzip -c target/release/valheim-motd > valheim-motd-macos.gz
+
+      - name: Upload macOS binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-binary
+          path: valheim-motd-macos.gz
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-linux, build-macos]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set Release Tag Name
+        id: tag_name
+        run: echo "TAG_NAME=\"v$(date +%F)\"" >> $GITHUB_ENV
+
+      - name: Download Linux binary
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-binary
+
+      - name: Download macOS binary
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-binary
+
+      - name: Create Release and Upload Binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ env.TAG_NAME }} valheim-motd-linux.gz valheim-motd-macos.gz --title "${{ env.TAG_NAME }}" --notes "Automated release on push to main branch"

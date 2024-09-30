@@ -1,6 +1,6 @@
 [package]
 name = "valheim-motd"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [dependencies]
@@ -8,5 +8,5 @@ rand = "0.8.5"
 textwrap = "0.16.1"
 
 [[bin]]
-name = "valheim-quote"
+name = "valheim-motd"
 path = "src/main.rs"

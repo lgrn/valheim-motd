@@ -10,18 +10,18 @@ Add a random dream quote from Valheim to your motd.
 
 ```bash
 cargo build --release
-sudo mv target/release/valheim-quote /usr/bin/
+sudo mv target/release/valheim-motd /usr/bin/
 ```
 
 3. add motd section. on debian, this is done by placing a shell script
    in `/etc/update-motd.d/`:
 
-`/etc/update-motd.d/99-valheim-quote` (`+x`):
+`/etc/update-motd.d/99-valheim-motd` (`+x`):
 
 ```bash
 #!/bin/bash
 echo "" # <- optional, if linebreak is needed
-/usr/bin/valheim-quote
+/usr/bin/valheim-motd
 ```
 
 ## example motd
